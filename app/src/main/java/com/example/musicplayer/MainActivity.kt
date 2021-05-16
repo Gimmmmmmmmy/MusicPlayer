@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Message
 import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.musicplayer.databinding.ActivityMainBinding
 
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     var currentPlaying = "drowning"
     var song = listOf<Int>()
     var songCount = 0
+    var duration = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,14 +29,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         song += R.raw.drowning
         song += R.raw.might_not_give_up
+        song += R.raw.thug_love
 
-        mp = MediaPlayer.create(this, song[0])
-        mp2 = MediaPlayer.create(this, song[1])
+        playSong(songCount)
         mp.isLooping = true
         mp.setVolume(0.5f, 0.5f)
-        totalTime = mp.duration
-        var duration = mp.duration.toString()
-        binding.remainingTimeLabel.text = "$duration"
 
 
         // Volume Bar
@@ -127,24 +126,32 @@ class MainActivity : AppCompatActivity() {
     }
     fun prevBtnClick(v: View) {
 
-        if (binding.positionBar.progress<5) {
-            // Stop
-            mp.seekTo(0)
-
+        songCount--
+        if (songCount>=0) {
+            mp.pause()
+            playSong(songCount)
+            mp.start()
         } else {
-            // Start
-            mp.seekTo(0)
+            songCount = 0
+            val toast = Toast.makeText(this, "This is the first song!", Toast.LENGTH_SHORT)
+            toast.show()
+
         }
     }
     fun nextBtnClick(v: View) {
 
-        if (mp.isPlaying) {
-            mp.setNextMediaPlayer(mp2)
-            binding.positionBar.progress = 100
+        songCount++
+        if (songCount<song.size) {
+            mp.pause()
+            playSong(songCount)
+            mp.start()
         } else {
-            mp2.setNextMediaPlayer(mp)
-            binding.positionBar.progress = 100
+            songCount = song.size-1
+            val toast = Toast.makeText(this, "This is the last song!", Toast.LENGTH_SHORT)
+            toast.show()
         }
+
+
     }
     fun muteBtnClick(v: View) {
 
@@ -160,6 +167,12 @@ class MainActivity : AppCompatActivity() {
             mp.setVolume(0.0F,0.0f)
             muteChek = true
         }
+    }
+    fun playSong(songCount:Int) {
+        mp = MediaPlayer.create(this, song[songCount])
+        totalTime = mp.duration
+        duration = mp.duration.toString()
+        binding.remainingTimeLabel.text = "$duration"
     }
 
 }
